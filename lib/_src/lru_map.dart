@@ -19,36 +19,33 @@ import 'dart:core';
 ///   print(map.values); -> 2,3,1
 ///
 ///
-class LruMap<K, V> implements Map<K, V> {
-  _Entry<K, V> head;
-  _Entry<K, V> tail;
+class LruMap<K, V> implements Map<K?, V?> {
+  _Entry<K?, V?>? head;
+  _Entry<K?, V?>? tail;
 
-  final Map<K, _Entry<K, V>> _inner = new Map();
+  final Map<K?, _Entry<K?, V?>> _inner = new Map();
 
   int get length => _inner.length;
 
   LruMap();
 
   factory LruMap.of(Map<K, V> map) {
-    if (map is LruMap<K, V>) {
-      return map;
-    }
     LruMap<K, V> result = new LruMap<K, V>();
     result.addAll(map);
     return result;
   }
 
-  Iterable<V> get values {
-    List<V> list = [];
-    for (_Entry<K, V> e = head; e != null; e = e.after) {
+  Iterable<V?> get values {
+    List<V?> list = [];
+    for (_Entry<K?, V?>? e = head; e != null; e = e.after) {
       list.add(e.value);
     }
     return list;
   }
 
-  Iterable<K> get keys {
-    List<K> list = [];
-    for (_Entry<K, V> e = head; e != null; e = e.after) {
+  Iterable<K?> get keys {
+    List<K?> list = [];
+    for (_Entry<K?, V?>? e = head; e != null; e = e.after) {
       list.add(e.key);
     }
     return list;
@@ -60,17 +57,17 @@ class LruMap<K, V> implements Map<K, V> {
   }
 
   @override
-  V operator [](Object key) {
+  V? operator [](Object? key) {
     //
-    _Entry<K, V> node = _inner[key];
+    _Entry<K?, V?>? node = _inner[key as K];
     if (node == null) return null;
     _afterNodeAccess(node);
     return node.value;
   }
 
-  void _afterNodeRemoval(_Entry<K, V> e) {
+  void _afterNodeRemoval(_Entry<K?, V?> e) {
     // unlink
-    _Entry<K, V> p = e, b = p.before, a = p.after;
+    _Entry<K?, V?>? p = e, b = p.before, a = p.after;
     p.before = p.after = null;
     if (b == null)
       head = a;
@@ -82,15 +79,15 @@ class LruMap<K, V> implements Map<K, V> {
       a.before = b;
   }
 
-  V remove(Object key) {
-    _Entry<K, V> node = _inner.remove(key);
+  V? remove(Object? key) {
+    _Entry<K?, V?>? node = _inner.remove(key);
     if (node == null) return null;
     _afterNodeRemoval(node);
     return node.value;
   }
 
-  void _linkNodeLast(_Entry<K, V> p) {
-    _Entry<K, V> last = tail;
+  void _linkNodeLast(_Entry<K?, V?> p) {
+    _Entry<K?, V?>? last = tail;
     tail = p;
     if (last == null)
       head = p;
@@ -100,8 +97,8 @@ class LruMap<K, V> implements Map<K, V> {
     }
   }
 
-  V removeHead() {
-    _Entry<K, V> head = this.head;
+  V? removeHead() {
+    _Entry<K?, V?>? head = this.head;
     if (head == null) {
       return null;
     }
@@ -111,7 +108,7 @@ class LruMap<K, V> implements Map<K, V> {
       this.head = this.tail = null;
     } else {
       this.head = head.after;
-      this.head.before = null;
+      this.head!.before = null;
       head.after = null;
     }
 
@@ -121,10 +118,10 @@ class LruMap<K, V> implements Map<K, V> {
   }
 
   // move to end of the list
-  void _afterNodeAccess(_Entry<K, V> e) {
-    _Entry<K, V> last;
+  void _afterNodeAccess(_Entry<K?, V?> e) {
+    _Entry<K?, V?>? last;
     if ((last = tail) != e) {
-      _Entry<K, V> p = e, b = p.before, a = p.after;
+      _Entry<K?, V?>? p = e, b = p.before, a = p.after;
       p.after = null;
       if (b == null)
         head = a;
@@ -145,28 +142,28 @@ class LruMap<K, V> implements Map<K, V> {
   }
 
   @override
-  void addAll(Map<K, V> other) {
+  void addAll(Map<K?, V?> other) {
     assert(other != null);
-    other.forEach((K key, V value) {
+    other.forEach((K? key, V? value) {
       this[key] = value;
     });
   }
 
   @override
-  void addEntries(Iterable<MapEntry<K, V>> newEntries) {
-    newEntries.forEach((MapEntry<K, V> entry) {
+  void addEntries(Iterable<MapEntry<K?, V?>> newEntries) {
+    newEntries.forEach((MapEntry<K?, V?> entry) {
       this[entry.key] = entry.value;
     });
   }
 
   @override
-  bool containsKey(Object key) {
+  bool containsKey(Object? key) {
     return _inner.containsKey(key);
   }
 
   @override
-  bool containsValue(Object value) {
-    for (_Entry<K, V> e = head; e != null; e = e.after) {
+  bool containsValue(Object? value) {
+    for (_Entry<K?, V?>? e = head; e != null; e = e.after) {
       if (e.value == value) {
         return true;
       }
@@ -181,15 +178,15 @@ class LruMap<K, V> implements Map<K, V> {
   bool get isNotEmpty => _inner.isNotEmpty;
 
   @override
-  void forEach(void Function(K key, V value) f) {
-    for (_Entry<K, V> e = head; e != null; e = e.after) {
+  void forEach(void Function(K? key, V? value) f) {
+    for (_Entry<K?, V?>? e = head; e != null; e = e.after) {
       f(e.key, e.value);
     }
   }
 
   @override
-  void removeWhere(bool Function(K key, V value) predicate) {
-    _inner.removeWhere((K _key, _Entry<K, V> _value) {
+  void removeWhere(bool Function(K? key, V? value) predicate) {
+    _inner.removeWhere((K? _key, _Entry<K?, V?> _value) {
       if (predicate(_key, _value.value)) {
         _afterNodeRemoval(_value);
         return true;
@@ -199,24 +196,24 @@ class LruMap<K, V> implements Map<K, V> {
   }
 
   @override
-  Iterable<MapEntry<K, V>> get entries {
-    List<MapEntry<K, V>> list = [];
-    for (_Entry<K, V> e = head; e != null; e = e.after) {
+  Iterable<MapEntry<K?, V?>> get entries {
+    List<MapEntry<K?, V?>> list = [];
+    for (_Entry<K?, V?>? e = head; e != null; e = e.after) {
       list.add(new MapEntry(e.key, e.value));
     }
     return list;
   }
 
-  _Entry _createNew(K key, V value) {
+  _Entry _createNew(K? key, V? value) {
     _Entry<K, V> entry = new _Entry(key: key, value: value);
     _linkNodeLast(entry);
     return entry;
   }
 
-  void operator []=(K key, dynamic value) {
-    _Entry<K, V> node = _inner[key];
+  void operator []=(K? key, dynamic value) {
+    _Entry<K?, V?>? node = _inner[key];
     if (node == null) {
-      _inner[key] = _createNew(key, value);
+      _inner[key] = _createNew(key, value) as _Entry<K?, V?>;
     } else {
       //new Node
       _afterNodeAccess(node);
@@ -224,38 +221,38 @@ class LruMap<K, V> implements Map<K, V> {
   }
 
   @override
-  V putIfAbsent(K key, V Function() ifAbsent) {
+  V? putIfAbsent(K? key, V? Function() ifAbsent) {
     assert(ifAbsent != null);
     return _inner.putIfAbsent(key, () {
-      V value = ifAbsent();
-      return _createNew(key, value);
-    })?.value;
+      V? value = ifAbsent();
+      return _createNew(key, value) as _Entry<K?, V?>;
+    }).value;
   }
 
   @override
-  V update(K key, V Function(V value) update, {V Function() ifAbsent}) {
+  V? update(K? key, V? Function(V? value) update, {V? Function()? ifAbsent}) {
     assert(update != null);
-    var updateFunc = (_Entry<K, V> _value) {
-      V value = update(_value.value);
+    var updateFunc = (_Entry<K?, V?> _value) {
+      V? value = update(_value.value);
       _value.value = value;
       _afterNodeAccess(_value);
       return _value;
     };
     if (ifAbsent != null) {
       return _inner.update(key, updateFunc, ifAbsent: () {
-        V value = ifAbsent();
-        return _createNew(key, value);
-      })?.value;
+        V? value = ifAbsent();
+        return _createNew(key, value) as _Entry<K?, V?>;
+      }).value;
     } else {
-      return _inner.update(key, updateFunc)?.value;
+      return _inner.update(key, updateFunc).value;
     }
   }
 
   @override
-  void updateAll(V Function(K key, V value) update) {
+  void updateAll(V? Function(K? key, V? value) update) {
     assert(update != null);
-    _inner.updateAll((K _key, _Entry<K, V> _value) {
-      V value = update(_key, _value.value);
+    _inner.updateAll((K? _key, _Entry<K?, V?> _value) {
+      V? value = update(_key, _value.value);
       _value.value = value;
 
       /// update all values,we need to update all element orders,
@@ -282,11 +279,11 @@ class LruMap<K, V> implements Map<K, V> {
 
 /// Store key and value
 class _Entry<K, V> {
-  final K key;
-  V value;
+  final K? key;
+  V? value;
 
-  _Entry<K, V> before;
-  _Entry<K, V> after;
+  _Entry<K, V>? before;
+  _Entry<K, V>? after;
 
   _Entry({this.key, this.value});
 }

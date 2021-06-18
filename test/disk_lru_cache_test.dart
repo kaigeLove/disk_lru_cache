@@ -25,7 +25,7 @@ void main() {
     print('============================\n${cacheDirectory.path}');
 
     // write stream
-    CacheEditor editor = await cache.edit('imagekey');
+    CacheEditor? editor = await cache.edit('imagekey');
     if (editor != null) {
       HttpClient client = new HttpClient();
       HttpClientRequest request = await client.openUrl(
@@ -39,7 +39,7 @@ void main() {
       await editor.commit();
 
       // read stream
-      CacheSnapshot snapshot = await cache.get('imagekey');
+      CacheSnapshot snapshot = await (cache.get('imagekey') as FutureOr<CacheSnapshot>);
       Uint8List bytes = await snapshot.getBytes(0);
       print(bytes.length);
     }
@@ -53,7 +53,7 @@ void main() {
         opCompactThreshold: 200);
 
     // write stream
-    CacheEditor editor = await cache.edit('filekey');
+    CacheEditor? editor = await cache.edit('filekey');
     if (editor != null) {
       IOSink sink = await editor.newSink(0);
       sink.write('your value');
@@ -62,7 +62,7 @@ void main() {
     }
 
     // read stream
-    CacheSnapshot snapshot = await cache.get('filekey');
+    CacheSnapshot snapshot = await (cache.get('filekey') as FutureOr<CacheSnapshot>);
     String str = await snapshot.getString(0);
     print(str);
   });
@@ -75,8 +75,8 @@ void main() {
         opCompactThreshold: 200);
     print(cache.directory);
 
-    String str200k;
-    String get200k() {
+    String? str200k;
+    String? get200k() {
       if (str200k == null) {
         StringBuffer sb = new StringBuffer();
 
@@ -95,8 +95,8 @@ void main() {
       List<Future> writeDisk = [];
       List<Future> openWrite = [];
 
-      void editValue(DiskLruCache cache, String key, String value) {
-        list.add(cache.edit(key).then((CacheEditor editor) {
+      void editValue(DiskLruCache cache, String key, String? value) {
+        list.add(cache.edit(key).then((CacheEditor? editor) {
           if (editor != null) {
             openWrite.add(editor.newSink(0).then((IOSink sink) async {
               writeDisk.add((() async {
@@ -128,7 +128,7 @@ void main() {
         for (int i = 0; i < 10; ++i) {
           editValue(cache, "${random()}", get200k());
           String key = "${random()}";
-          cache.get(key).then((CacheSnapshot s) {
+          cache.get(key).then((CacheSnapshot? s) {
             if (s == null) {
               print('Cache miss $key');
               return;
@@ -171,7 +171,7 @@ void main() {
   Future testRemoveAll() async {
     DiskLruCache cache = new DiskLruCache(
         maxSize: maxSize, directory: cacheDirectory, filesCount: 1);
-    List<bool> results = await cache.clean();
+    List<bool> results = await (cache.clean() as FutureOr<List<bool>>);
     expect(results.every((bool value) => value), true);
     expect(cache.size, 0);
   }
@@ -196,14 +196,14 @@ void main() {
     DiskLruCache cache = new DiskLruCache(
         maxSize: maxSize, directory: cacheDirectory, filesCount: 2);
     // write stream
-    CacheEditor editor = await cache.edit('filekey');
+    CacheEditor? editor = await cache.edit('filekey');
     if (editor != null) {
       IOSink sink = await editor.newSink(0);
       sink.write('your value');
       await sink.close();
       await editor.commit();
 
-      CacheSnapshot snapshot = await cache.get("filekey");
+      CacheSnapshot? snapshot = await cache.get("filekey");
       expect(snapshot, null);
     }
   });
@@ -212,7 +212,7 @@ void main() {
     DiskLruCache cache = new DiskLruCache(
         maxSize: maxSize, directory: cacheDirectory, filesCount: 1);
     // write stream
-    CacheEditor editor = await cache.edit('errorkey');
+    CacheEditor? editor = await cache.edit('errorkey');
     if (editor != null) {
       IOSink sink = await editor.newSink(0);
 
@@ -225,7 +225,7 @@ void main() {
       values = values.where((CacheEntry entry) {
         return entry.key == "errorkey";
       });
-      await values.toList()[0].dirtyFiles[0].delete();
+      await values.toList()[0].dirtyFiles[0]!.delete();
 
       await sink.close();
       await editor.commit();
@@ -240,7 +240,7 @@ void main() {
     DiskLruCache cache = new DiskLruCache(
         maxSize: maxSize, directory: cacheDirectory, filesCount: 1);
 
-    CacheEditor editor = await cache.edit('readkey');
+    CacheEditor? editor = await cache.edit('readkey');
     if (editor != null) {
       IOSink sink = await editor.newSink(0);
 
@@ -255,7 +255,7 @@ void main() {
         return entry.key == "readkey";
       });
       try {
-        await values.toList()[0].cleanFiles[0].delete();
+        await values.toList()[0].cleanFiles[0]!.delete();
       } catch (e) {
         print(e);
       }
@@ -268,7 +268,7 @@ void main() {
     DiskLruCache cache = new DiskLruCache(
         maxSize: maxSize, directory: cacheDirectory, filesCount: 1);
 
-    CacheEditor editor = await cache.edit('readkey');
+    CacheEditor? editor = await cache.edit('readkey');
 
     await cache.close();
 
@@ -276,7 +276,7 @@ void main() {
         maxSize: maxSize, directory: cacheDirectory, filesCount: 1);
 
     editor = await cache.edit("readkey");
-    IOSink sink = await editor.newSink(0);
+    IOSink sink = await editor!.newSink(0);
 
     sink.write('your value');
     await sink.flush();

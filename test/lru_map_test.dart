@@ -13,7 +13,7 @@ void main() {
     map['b'] = 2;
     map['c'] = 3;
 
-    Iterable<int> values = map.values;
+    Iterable<int?> values = map.values;
     print(values);
 
     expect(values.toList()[0], 1);
@@ -33,7 +33,7 @@ void main() {
     expect(values.toList()[1], 3);
     expect(values.toList()[2], 1);
 
-    Iterable<String> keys = map.keys;
+    Iterable<String?> keys = map.keys;
 
     expect(keys.toList()[0], 'b');
     expect(keys.toList()[1], 'c');
@@ -41,7 +41,7 @@ void main() {
     expect(map.isEmpty, false);
     expect(map.isNotEmpty, true);
 
-    int value = map.removeHead();
+    int? value = map.removeHead();
     expect(value, 2);
     keys = map.keys;
     expect(keys.length, 2);
@@ -81,7 +81,7 @@ void main() {
     expect(keys.toList()[0], 'c');
     expect(keys.toList()[1], 'd');
 
-    map.update("c", (int value) {
+    map.update("c", (int? value) {
       return 4;
     }, ifAbsent: () {
       return 0;
@@ -89,7 +89,7 @@ void main() {
 
     expect(map['c'], 4);
 
-    map.update("e", (int value) {
+    map.update("e", (int? value) {
       return 8;
     }, ifAbsent: () {
       return 0;
@@ -97,8 +97,8 @@ void main() {
 
     expect(map['e'], 0);
 
-    map.updateAll((String key, int value) {
-      return value + 1;
+    map.updateAll((String? key, int? value) {
+      return value! + 1;
     });
 
     expect(map['e'], 1);

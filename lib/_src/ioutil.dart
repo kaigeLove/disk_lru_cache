@@ -6,12 +6,12 @@ import 'dart:io';
 /// When a Stream is receiving events, this class also receiving the same events.
 ///
 class CloseableStream<T> extends Stream<T> implements Closeable {
-  StreamSubscription<T> _streamSubscription;
+  StreamSubscription<T>? _streamSubscription;
 
   final Stream<T> _stream;
-  final void Function(T event) onData;
-  final void Function() onDone;
-  final Function onError;
+  final void Function(T event)? onData;
+  final void Function()? onDone;
+  final Function? onError;
 
   CloseableStream(
     this._stream, {
@@ -21,33 +21,33 @@ class CloseableStream<T> extends Stream<T> implements Closeable {
   });
 
   @override
-  StreamSubscription<T> listen(void Function(T event) onData,
-      {Function onError, void Function() onDone, bool cancelOnError}) {
+  StreamSubscription<T> listen(void Function(T event)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     assert(onData != null);
-    void Function(T event) _onData;
+    void Function(T event)? _onData;
     if (this.onData != null && onData != null) {
       _onData = (T event) {
-        this.onData(event);
+        this.onData!(event);
         onData(event);
       };
     } else {
       _onData = onData ?? this.onData;
     }
 
-    Function _onError;
+    Function? _onError;
     if (this.onError != null && onError != null) {
       _onError = (e) {
-        this.onError(e);
+        this.onError!(e);
         onError(e);
       };
     } else {
       _onError = onError ?? this.onError;
     }
 
-    void Function() _onDone;
+    void Function()? _onDone;
     if (this.onDone != null && onDone != null) {
       _onDone = () {
-        this.onDone();
+        this.onDone!();
         onDone();
       };
     } else {
@@ -57,9 +57,9 @@ class CloseableStream<T> extends Stream<T> implements Closeable {
     try {
       _streamSubscription = _stream.listen(_onData,
           onError: _onError, onDone: _onDone, cancelOnError: cancelOnError);
-      return _streamSubscription;
+      return _streamSubscription!;
     } catch (e) {
-      _onError(e);
+      _onError!(e);
       rethrow;
     }
   }
@@ -69,7 +69,7 @@ class CloseableStream<T> extends Stream<T> implements Closeable {
     if (_streamSubscription == null) {
       return new Future.value();
     }
-    return _streamSubscription.cancel();
+    return _streamSubscription!.cancel();
   }
 }
 
@@ -99,13 +99,13 @@ abstract class Closeable {
 /// This IOSink do nothing when operation
 class EmptyIOSink implements IOSink {
   @override
-  Encoding encoding;
+  late Encoding encoding;
 
   @override
   void add(List<int> data) {}
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) {}
+  void addError(Object error, [StackTrace? stackTrace]) {}
 
   @override
   Future addStream(Stream<List<int>> stream) {
@@ -126,7 +126,7 @@ class EmptyIOSink implements IOSink {
   }
 
   @override
-  void write(Object obj) {}
+  void write(Object? obj) {}
 
   @override
   void writeAll(Iterable objects, [String separator = ""]) {}
@@ -135,7 +135,7 @@ class EmptyIOSink implements IOSink {
   void writeCharCode(int charCode) {}
 
   @override
-  void writeln([Object obj = ""]) {}
+  void writeln([Object? obj = ""]) {}
 }
 
 typedef void IOSinkOnError(e);
@@ -145,7 +145,7 @@ class IOSinkProxy implements IOSink {
   final IOSink sink;
   final IOSinkOnError onError;
 
-  IOSinkProxy(this.sink, {this.onError})
+  IOSinkProxy(this.sink, {required this.onError})
       : assert(onError != null),
         encoding = sink.encoding;
 
@@ -162,7 +162,7 @@ class IOSinkProxy implements IOSink {
   }
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) {
+  void addError(Object error, [StackTrace? stackTrace]) {
     sink.addError(error, stackTrace);
   }
 
@@ -197,7 +197,7 @@ class IOSinkProxy implements IOSink {
   }
 
   @override
-  void write(Object obj) {
+  void write(Object? obj) {
     try {
       sink.write(obj);
     } catch (e) {
@@ -224,7 +224,7 @@ class IOSinkProxy implements IOSink {
   }
 
   @override
-  void writeln([Object obj = ""]) {
+  void writeln([Object? obj = ""]) {
     try {
       sink.writeln(obj);
     } catch (e) {

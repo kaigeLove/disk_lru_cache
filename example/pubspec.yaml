@@ -1,6 +1,10 @@
 name: example
 description: A new Flutter project.
 
+environment:
+  sdk: '>=2.10.0 <3.0.0'
+  flutter: ">=1.22.5"
+
 dependencies:
   flutter:
     sdk: flutter
@@ -9,7 +13,7 @@ dependencies:
     path: ../
 
   http:
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^1.0.3
 
 dev_dependencies:
   flutter_test:
